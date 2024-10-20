@@ -1,0 +1,385 @@
+{% load static %}
+{% load customfilter %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% if page_title %}
+    <title>{{page_title}} | {{system_name}}</title>
+    {% else %}
+    <title>{{system_name}}</title>
+    {% endif %}
+    <link rel="shortcut icon" href="{% static 'assets/default/img/logo.jpg' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
+        integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{% static 'assets/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/default/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/select2/dist/css/select2.min.css' %}">
+    {% comment %} css regarding datatables {% endcomment %}
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.0/css/dataTables.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.dataTables.min.css">
+    {% comment %} scripts regarding data tables {% endcomment %}
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.1.0/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.0/js/dataTables.buttons.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.0/js/buttons.dataTables.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.0/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.0/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.0/js/dataTables.responsive.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.0/js/responsive.dataTables.js"></script>
+    <script src="https://cdn.datatables.net/rowgroup/1.5.0/js/dataTables.rowGroup.js"></script>
+    <script src="https://cdn.datatables.net/rowgroup/1.5.0/js/rowGroup.dataTables.js"></script>
+    {% comment %} {% endcomment %}
+    <script src="https://cdn.datatables.net/rowgroup/1.4.1/js/dataTables.rowGroup.min.js"></script>
+    <script src="{% static 'assets/bootstrap/js/popper.min.js' %}"></script>
+    <script src="{% static 'assets/select2/dist/js/select2.min.js' %}"></script>
+    <script src="{% static 'assets/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'assets/default/js/script.js' %}"></script>
+    <script type="text/javascript" src="{% static 'assets/default/js/vfs_fonts.js' %}"></script>
+    <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 5px;
+            left: 10px;
+            font-size: 24px;
+            background-color: #008bba00;
+            color: rgb(41, 40, 40);
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .sidebar-toggle:focus {
+            outline: none;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: #ffffff;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            position: fixed;
+            left: 0;
+            top: 0;
+            transition: 0.3s ease;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 15px 20px;
+            color: #333;
+            text-decoration: none;
+            font-size: 16px;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+
+        .menu-item:hover,
+        .menu-item.active,
+        .dropdown li a.active {
+            background-color: #f5f5f5;
+            /* Same as main content background */
+        }
+
+        .has-dropdown>.menu-item:after {
+            content: '▼';
+            font-size: 12px;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .dropdown {
+            display: none;
+            list-style: none;
+            padding-left: 30px;
+        }
+
+        .dropdown li a {
+            display: block;
+            padding: 10px 20px;
+            font-size: 14px;
+            color: #666;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .dropdown li a:hover {
+            background-color: #e0e0e0;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            background-image:url("{% static 'assets/default/img/bg1.jpg' %}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            flex: 1;
+            margin-left: 250px;
+            padding: 30px;
+            background-color: #f5f5f5;
+            overflow: auto;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Mobile View */
+        @media (max-width: 576px) {
+
+            .sidebar {
+                width: 250px;
+                left: -250px;
+                z-index: 1000;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content.shifted {
+                margin-left: 250px;
+            }
+        }
+
+        /* Add overlay */
+    </style>
+</head>
+
+<body class="">
+
+    <button id="sidebar-toggle" class="sidebar-toggle">&#9776;</button>
+    <div class="sidebar" id="sidebar">
+        <ul class="sidebar-menu">
+            {% if request.user.staffuser or request.user.is_staff %}
+            <li class="has-dropdown">
+                <a class="menu-item">Users</a>
+                <ul class="dropdown">
+                    <li><a data-url="{% url 'core:manage-user' %}">Create</a></li>
+                    <li><a data-url="{% url 'core:user-list' %}">List</a></li>
+                </ul>
+            </li>
+            {% endif %}
+            {% if options %}
+            {% for option in options %}
+            {% if option.parties %}
+            <li class="has-dropdown">
+                <a class="menu-item">Parties</a>
+                <ul class="dropdown">
+                    <li><a data-url="/parties/create">Create</a></li>
+                    <li><a data-url="{% url 'accounts:user-detail-pk' pk=user.id %}">List</a></li>
+                </ul>
+            </li>
+            {% endif %}
+            {% if option.products %}
+            <li class="has-dropdown">
+                <a class="menu-item">Products</a>
+                <ul class="dropdown">
+                    <li><a data-url="/products/create">Create</a></li>
+                    <li><a data-url="/products/list">List</a></li>
+                </ul>
+            </li>
+            {% endif %}
+            {% if option.sales %}
+            <li class="has-dropdown">
+                <a class="menu-item">Sales</a>
+                <ul class="dropdown">
+                    <li><a data-url="/sales/create">Create</a></li>
+                    <li><a data-url="/sales/list">List</a></li>
+                </ul>
+            </li>
+            {% endif %}
+            {% if option.purchase %}
+            <li class="has-dropdown">
+                <a class="menu-item">Purchase</a>
+                <ul class="dropdown">
+                    <li><a data-url="/purchase/create">Create</a></li>
+                    <li><a data-url="/purchase/list">List</a></li>
+                </ul>
+            </li>
+            {% endif %}
+            {% if option.conversion %}
+            <li class="has-dropdown">
+                <a class="menu-item">Conversion</a>
+                <ul class="dropdown">
+                    <li><a data-url="/conversion/create">Create</a></li>
+                    <li><a data-url="/conversion/list">List</a></li>
+                </ul>
+            </li>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+            <li>
+                <a data-url="/logout" class="menu-item">Logout</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
+        {% block content %}
+        <h1>Welcome to the Dashboard</h1>
+        <p>Click on the sidebar menu items to navigate.</p>
+        {% endblock content %}
+    </div>
+
+
+    <!-- modals -->
+    <div class="modal fade" id="confirm_modal" aria-hidden="true" tabindex="-1" role='dialog'
+        aria-labelledby="confirmModalLabel">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content rounded-0">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalLabel">Confirmation</h5>
+                </div>
+                <div class="modal-body">
+                    <div id="delete_content"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-flat btn-primary rounded-0" id='confirm'
+                        onclick="">Continue</button>
+                    <button type="button" class="btn btn-sm btn-flat btn-light border rounded-0"
+                        data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    $(document).ready(function () {
+        var lastVisitedUrl = localStorage.getItem('lastVisitedUrl');
+        if (lastVisitedUrl) {
+            loadComponent(lastVisitedUrl);
+            $('.menu-item, .dropdown li a').each(function () {
+                var url = $(this).data('url');
+                if (url === lastVisitedUrl) {
+                    $('.menu-item, .dropdown li a').removeClass('active');
+                    $(this).addClass('active');
+
+                    // Expand the parent dropdown if necessary
+                    var parentDropdown = $(this).closest('.dropdown');
+                    if (parentDropdown.length) {
+                        parentDropdown.slideDown();
+                    }
+                }
+            });
+        }
+        $('.has-dropdown > .menu-item').on('click', function (e) {
+            e.preventDefault();
+
+            // Toggle the dropdown visibility for the current item
+            let dropdown = $(this).next('.dropdown');
+
+            // Close other dropdowns except the current one
+            $('.dropdown').not(dropdown).slideUp();
+
+            // Toggle the clicked dropdown
+            dropdown.slideToggle();
+        });
+
+        // Handle clicks on dropdown items and main menu items
+        $('.menu-item, .dropdown li a').on('click', function (e) {
+            // Remove active class from all menu items and dropdown items
+            $('.menu-item, .dropdown li a').removeClass('active');
+
+            // Add active class to the clicked item
+            $(this).addClass('active');
+            e.preventDefault();
+
+            // Get the URL from data attribute or href
+            var url = $(this).data('url');
+            if (url) {
+                loadComponent(url);
+                $('#sidebar').toggleClass('active');
+            }
+        });
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('#sidebar, #sidebar-toggle').length) {
+                $('#sidebar').removeClass('active');
+            }
+        });
+        // Toggle sidebar on mobile
+        $('#sidebar-toggle').on('click', function () {
+            $('#sidebar').toggleClass('active');
+            // $('#main-content').toggleClass('shifted');
+        });
+
+        // Hide sidebar when clicking outside of it
+    });
+    function loadComponent(url) {
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function (data) {
+                $('#main-content').html(data);
+                console.log(data)
+                localStorage.setItem('lastVisitedUrl', url);
+            },
+            error: function () {
+                $('#main-content').html('<p>An error occurred while loading content.</p>');
+            }
+        });
+    }
+    const loader = $('<div>')
+    loader.attr('id', 'pre-loader')
+    loader.html('<div class="lds-facebook"><div></div><div></div><div></div><div></div>')
+
+    window.start_loader = function () {
+        $('body').removeClass('loading')
+        if ($('#pre-loader').length > 0)
+            $('pre-loader').remove();
+        $('body').append(loader)
+        $('body').addClass('loading')
+    }
+    window.end_loader = function () {
+        if ($('#pre-loader').length > 0)
+            $('#pre-loader').remove();
+        $('body').removeClass('loading')
+    }
+    window._conf = function ($msg = '', $func = '', $params = []) {
+        $('#confirm_modal #confirm').attr('onclick', $func + "(" + $params.join(',') + ")")
+        $('#confirm_modal .modal-body').html($msg)
+        $('#confirm_modal').modal('show')
+    }
+
+</script>
+
+</html>

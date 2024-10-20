@@ -1,0 +1,5 @@
+/static/
+/media/
+Pipfile
+Pipfile.lock
+db.sqlite3
